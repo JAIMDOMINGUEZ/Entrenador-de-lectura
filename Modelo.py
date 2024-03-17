@@ -8,36 +8,36 @@ class Usuario:
         self.contraseña = contraseña
         self.conn = establecer_conexion()
         self.cursor = self.conn.cursor()
+
     def registrar_Usuario(self):
         try:
-            self.conn= establecer_conexion()
             self.cursor.execute("INSERT INTO Usuario (Nombre_Usuario, Contraseña) VALUES (?, ?)", (self.nombre_usuario, self.contraseña))
             self.conn.commit()
             print("Cuenta creada exitosamente")
-            self.conn.close()
             return True
         except sqlite3.IntegrityError:
             print("El usuario ya existe")
-            self.conn.close()
             return False
-            
         except sqlite3.Error as e:
             print("Error al crear la cuenta:", e)
-            self.conn.close()
             return False
+
     def consultar_Usuario(self):
-        self.cursor.execute("SELECT * FROM Usuario WHERE Nombre_Usuario=? AND Contraseña=?", ( self.nombre_usuario, self.contraseña))
-        user = self.cursor.fetchone()
-        if user:
-            print("Inicio de sesión exitoso")
-            return True
-        else:
-            print("Nombre de usuario o contraseña incorrectos")
-            self.conn.commit()
-            #self.conn.close()
-            return False
+        try:
+            self.cursor.execute("SELECT * FROM Usuario WHERE Nombre_Usuario=? AND Contraseña=?", (self.nombre_usuario, self.contraseña))
+            user = self.cursor.fetchone()
+            if user:
+                print("Inicio de sesión exitoso")
+                return True
+            else:
+                print("Nombre de usuario o contraseña incorrectos")
+                return False
+        finally:
+            self.conn.close()
+
     def __del__(self):
-        self.conn.close()    
+        self.conn.close()
+
 class Lectura:
     def __init__(self, nombre, tipo_lectura,ubicacion):
         self.nombre = nombre

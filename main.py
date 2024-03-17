@@ -31,6 +31,6 @@ class CreaCuentaApp(App):
     def on_stop(self):
         # Cerrar la conexión de la base de datos al salir de la aplicación
         self.controlador.modelo.__del__()
-
+       #COMPLETO
 if __name__ == "__main__":
     CreaCuentaApp().run()

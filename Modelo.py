@@ -8,38 +8,46 @@ class Usuario:
         self.contraseña = contraseña
         self.conn = establecer_conexion()
         self.cursor = self.conn.cursor()
-    def registrar_Usuario(self, Nombre_Usuario, Contraseña):
+    def registrar_Usuario(self):
         try:
-            self.cursor.execute("INSERT INTO Usuario (Nombre_Usuario, Contraseña) VALUES (?, ?)", (Nombre_Usuario, Contraseña))
+            self.conn= establecer_conexion()
+            self.cursor.execute("INSERT INTO Usuario (Nombre_Usuario, Contraseña) VALUES (?, ?)", (self.nombre_usuario, self.contraseña))
             self.conn.commit()
             print("Cuenta creada exitosamente")
+            self.conn.close()
             return True
         except sqlite3.IntegrityError:
             print("El usuario ya existe")
+            self.conn.close()
             return False
+            
         except sqlite3.Error as e:
             print("Error al crear la cuenta:", e)
+            self.conn.close()
             return False
-    def consultar_Usuario(self, Nombre_Usuario, Contraseña):
-        self.cursor.execute("SELECT * FROM Usuario WHERE Nombre_Usuario=? AND Contraseña=?", (Nombre_Usuario, Contraseña))
+    def consultar_Usuario(self):
+        self.cursor.execute("SELECT * FROM Usuario WHERE Nombre_Usuario=? AND Contraseña=?", ( self.nombre_usuario, self.contraseña))
         user = self.cursor.fetchone()
         if user:
             print("Inicio de sesión exitoso")
             return True
         else:
             print("Nombre de usuario o contraseña incorrectos")
+            self.conn.commit()
+            #self.conn.close()
             return False
+    def __del__(self):
+        self.conn.close()    
 class Lectura:
     def __init__(self, nombre, tipo_lectura,ubicacion):
         self.nombre = nombre
         self.tipo_lectura = tipo_lectura
         self.ubicacion=ubicacion
-    def consultar_por_tipo(tipo_de_lectura):
+    def consultar_por_tipo(self,tipo_de_lectura):
         lecturas = []
-        conn = establecer_conexion()
-        if conn:
+        if self.conn:
             try:
-                cursor = conn.cursor()
+                cursor = self.conn.cursor()
                 cursor.execute("SELECT Nombre_Lectura FROM Lecturas WHERE Tipo_Lectura = ?", (tipo_de_lectura,))
                 rows = cursor.fetchall()
                 for row in rows:
@@ -48,15 +56,15 @@ class Lectura:
             except sqlite3.Error as e:
                 print("Error al ejecutar la consulta:", e)
             finally:
-                conn.close()
+                self.conn.close()
         else:
             print("No se pudo obtener la conexión a la base de datos.")
         return lecturas
-    def consultar_por_nombre(nombre_lectura):
-        conn = establecer_conexion()
-        if conn:
+    def consultar_por_nombre(self,nombre_lectura):
+        
+        if self.conn:
             try:
-                cursor = conn.cursor()
+                cursor = self.conn.cursor()
                 cursor.execute("SELECT Ubicacion_lectura FROM Lecturas WHERE Nombre_Lectura = ?", (nombre_lectura,))
                 rows = cursor.fetchall()
                 for row in rows:
@@ -64,36 +72,12 @@ class Lectura:
             except sqlite3.Error as e:
                 print("Error al ejecutar la consulta:", e)
             finally:
-                conn.close()
+                self.conn.close()
         else:
             print("No se pudo obtener la conexión a la base de datos.")
         return ""
 
-    def verificar_existencia_pdf(archivo):
-        if os.path.exists(archivo):
-            return True
-        else:
-            return False
-    def separar_pdf(nombre_archivo):
-        try:
-            # Abrir el archivo PDF
-            with open(nombre_archivo, 'rb') as archivo:
-                # Crear un objeto de lectura de PDF
-                lector_pdf = PyPDF2.PdfReader(archivo)
-                # Inicializar una lista para almacenar los párrafos
-                parrafos = []
-                # Iterar sobre cada página del PDF
-                for pagina_num in range(len(lector_pdf.pages)):
-                    # Extraer el texto de la página actual
-                    texto_pagina = lector_pdf.pages[pagina_num].extract_text()
-                    # Separar el texto por párrafos
-                    parrafos_pagina = texto_pagina.split('\n\n')  # Se asume que los párrafos están separados por dos saltos de línea
-                    # Agregar los párrafos de la página a la lista general de párrafos
-                    parrafos.extend(parrafos_pagina)
-                return parrafos
-        except FileNotFoundError:
-            print("El archivo especificado no fue encontrado.")
-            return None
-        except Exception as e:
-            print("Ocurrió un error:", e)
-            return None
+    def eliminar_lectura(self):
+        self.cursor.execute("DELETE FROM Lecturas WHERE ID_Lecturas=?", (self.selected_lectura_id,))
+        self.conn.commit()
+        self.conn.close()

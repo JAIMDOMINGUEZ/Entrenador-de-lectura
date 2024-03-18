@@ -1,4 +1,4 @@
-from Modelo import Usuario  
+from Modelo import Usuario, Lectura 
 from kivy.app import App
 class ControladorCuentas:
     def __init__(self):
@@ -19,9 +19,22 @@ class ControladorCuentas:
         else:
             return False
     
-    def verificar_usuario(self, Nombre_Usuario):
-        return self.modelo.verificar_usuario(Nombre_Usuario)
-       
+    def verificar_usuario(self, nombre_usuario):
+        return self.modelo.verificar_usuario(nombre_usuario)
+    def obtener_id_usuario(self,nombre_usuario,contraseña):
+        modelo=Usuario(nombre_usuario,contraseña)
+        return modelo.obtener_id_usuario(nombre_usuario)
+
+
+class ControladorLecturas:
+    def __init__(self):
+        self.modelo=Lectura("","","")
+    def mostrar_lecturas_disponibles(self):
+        return self.modelo.consultar_lecturas()
+    def mostrar_lectura_nombre(self,nombre_lectura):
+        return self.modelo.consultar_por_nombre(nombre_lectura)
+    def elimniar_lectura(self):
+        pass
     
 
     

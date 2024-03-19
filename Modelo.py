@@ -40,7 +40,7 @@ class Usuario:
             id_usuario = self.cursor.fetchone()  # Obtenemos la fila del resultado
             if id_usuario:
                 id_usuario = id_usuario[0]  # Extraemos el ID de usuario de la tupla
-                print("ID de usuario encontrado:", id_usuario)
+                
                 return id_usuario
             else:
                 print("No se encontró ningún usuario con el nombre proporcionado.")
@@ -78,35 +78,47 @@ class Lectura:
         else:
             print("No se pudo obtener la conexión a la base de datos.")
         return lecturas
-    def consultar_por_nombre(self,nombre_lectura):
+    def consultar_por_id(self,id_lectura,id_usuario):
         self.connexion=establecer_conexion()
         if self.connexion:
             try:
                 cursor = self.connexion.cursor()
-                cursor.execute("SELECT Nombre_Lectura FROM Lecturas WHERE ID_Lecturas = ?", (nombre_lectura,))
+                cursor.execute("SELECT l.Nombre_Lectura FROM Lecturas l JOIN Cliente_Lecturas cl ON l.ID_Lecturas = cl.ID_Lectura WHERE l.ID_Lecturas = ? AND cl.ID_Usuario = ?", (id_lectura, id_usuario))
                 row = cursor.fetchall()
-                
                 return row[0]
             except sqlite3.Error as e:
-                print("Error al ejecutar la consulta:", e)
+                print("Error al ejecutar la consulta de id:", e)
             finally:
                 self.connexion.close()
         else:
             print("No se pudo obtener la conexión a la base de datos.")
         return ""
 
-    def eliminar_lectura(self,nombre_lectura):
-        self.cursor.execute("DELETE FROM Lecturas WHERE ID_Lecturas=?", (nombre_lectura,))
-        self.connexion.close()
-    def consultar_lecturas(self):
+    def eliminar_lectura(self, nombre_lectura,id_usuario):
+        self.connexion = establecer_conexion()
+        if self.connexion:
+            try:
+                self.cursor = self.connexion.cursor()
+                self.cursor.execute("DELETE FROM Cliente_Lecturas WHERE ID_Lectura IN ( SELECT ID_Lecturas FROM Lecturas WHERE Nombre_Lectura = ?)AND ID_Usuario = ?", (nombre_lectura,id_usuario))
+                self.connexion.commit()  # Es importante hacer commit después de ejecutar la eliminación
+                print("La lectura se ha eliminado correctamente.")
+                return True
+            except sqlite3.Error as e:
+                print("Error al ejecutar la consulta de eliminacion:", e)
+            finally:
+                self.connexion.close()
+        else:
+            print("No se pudo obtener la conexión a la base de datos.")
+        return False
+
+    def consultar_lecturas(self, id_usuario):
         lecturas = []
         self.connexion=establecer_conexion()
         if self.connexion:
             try:
-                self.cursor.execute("SELECT ID_Lecturas, Nombre_Lectura, Tipo_Lectura FROM Lecturas")
+                self.cursor.execute("SELECT l.* FROM Lecturas l JOIN Cliente_Lecturas cl ON l.ID_Lecturas = cl.ID_Lectura WHERE cl.ID_Usuario = ?",(id_usuario,))
                 rows = self.cursor.fetchall()
                 for row in rows:
-                   
                     lecturas.append(row)   
             except sqlite3.Error as e:
                 print("Error al ejecutar la consulta:", e)
@@ -115,3 +127,26 @@ class Lectura:
         else:
             print("No se pudo obtener la conexión a la base de datos.")
         return lecturas
+    def guardar_lectura(self, id_usuario, nombre_lectura, tipo_lectura, ubicacion):
+        self.connexion = establecer_conexion()
+        if self.connexion:
+            try:
+                cursor = self.connexion.cursor()
+                # Insertar la lectura en la tabla Lecturas
+                cursor.execute("INSERT INTO Lecturas (Nombre_Lectura, Tipo_Lectura, Ubicacion_Lectura) VALUES (?, ?, ?)",
+                               (nombre_lectura, tipo_lectura, ubicacion))
+                # Obtener el ID de la última fila insertada
+                last_row_id = cursor.lastrowid
+                # Insertar el ID de la lectura y el ID del usuario en la tabla Cliente_Lecturas
+                cursor.execute("INSERT INTO Cliente_Lecturas (ID_Usuario, ID_Lectura) VALUES (?, ?)",
+                               (id_usuario, last_row_id))
+                self.connexion.commit()
+                return True
+            except sqlite3.Error as e:
+                print("Error al ejecutar la consulta:", e)
+            finally:
+                self.connexion.close()
+        else:
+            print("No se pudo obtener la conexión a la base de datos.")
+        return False
+    

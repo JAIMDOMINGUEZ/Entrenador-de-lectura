@@ -28,11 +28,6 @@ class CreaCuentaApp(App):
         ventana_crea_cuenta = VentanaCrearCuenta(self.controlador)
         root.add_widget(ventana_crea_cuenta)
         return root
-    """
-    def on_stop(self):
-        # Cerrar la conexión de la base de datos al salir de la aplicación
-        self.controlador.__del__()
-       #COMPLET
-    """
+   
 if __name__ == "__main__":
     CreaCuentaApp().run()

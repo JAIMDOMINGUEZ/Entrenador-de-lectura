@@ -1,6 +1,5 @@
 import os
 import sqlite3
-#import fitz
 from kivy.uix.scrollview import ScrollView
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -93,7 +92,6 @@ class Administrador(RelativeLayout):
 
             if lectura:
                 lectura_nombre = lectura[0]
-
                 # Mostrar la advertencia para confirmar la eliminación con el nombre de la lectura
                 content = BoxLayout(orientation='vertical')
                 content.add_widget(Label(text=f"¿Estás seguro de eliminar la lectura '{lectura_nombre}'?", size_hint_y=None, height=dp(40)))
@@ -263,7 +261,18 @@ class Agregar_Lectura(RelativeLayout):
             content.add_widget(btn_layout)
             self.popup = Popup(title="Confirmar Subida", content=content, size_hint=(None, None), size=(400, 200))
             self.popup.open()
-
+    
+    def is_valid_pdf(self,file_path):
+        # Obtener la extensión del archivo
+        file_extension = os.path.splitext(file_path)[1].lower()
+    
+        # Comprobar si la extensión es .pdf
+        if file_extension == '.pdf':
+            return True
+        else:
+            return False
+        
+    """
     def is_valid_pdf(self, file_path):
         try:
             doc = fitz.open(file_path)
@@ -272,7 +281,7 @@ class Agregar_Lectura(RelativeLayout):
             return num_pages > 0
         except:
             return False
-
+    """
 
     def cancel_upload(self, instance):
         self.popup.dismiss()
@@ -392,7 +401,5 @@ class MainAppp(App):
         root = RootLayout()
         root.add_widget(sm)
         return root
-
-
 if __name__ == '__main__':
     MainAppp().run()

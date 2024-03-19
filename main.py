@@ -28,6 +28,5 @@ class CreaCuentaApp(App):
         ventana_crea_cuenta = VentanaCrearCuenta(self.controlador)
         root.add_widget(ventana_crea_cuenta)
         return root
-   
 if __name__ == "__main__":
     CreaCuentaApp().run()

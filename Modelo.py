@@ -61,12 +61,14 @@ class Lectura:
         self.ubicacion=ubicacion
         self.connexion = establecer_conexion()
         self.cursor = self.connexion.cursor()
-    def consultar_por_tipo(self,tipo_de_lectura):
+    def consultar_por_tipo(self,id_usuario,tipo_de_lectura):
+        self.connexion=establecer_conexion()
         lecturas = []
         if self.connexion:
             try:
                 cursor = self.connexion.cursor()
-                cursor.execute("SELECT Nombre_Lectura FROM Lecturas WHERE Tipo_Lectura = ?", (tipo_de_lectura,))
+                cursor.execute("SELECT Nombre_Lectura FROM Lecturas WHERE Tipo_Lectura = ? AND ID_Lecturas IN (SELECT ID_Lectura FROM Cliente_Lecturas WHERE ID_Usuario = ?)", 
+                           (tipo_de_lectura, id_usuario))
                 rows = cursor.fetchall()
                 for row in rows:
                    
@@ -150,3 +152,22 @@ class Lectura:
             print("No se pudo obtener la conexión a la base de datos.")
         return False
     
+    def consultar_ubicacion(self,id_usuario,nombre_lectura):
+        self.connexion= establecer_conexion()
+        ubicacion = "" 
+        if self.connexion:
+            try:
+                cursor = self.connexion.cursor()
+                # Modificamos la consulta SQL para incluir el criterio de id_usuario
+                cursor.execute("SELECT l.Ubicacion_lectura FROM Lecturas l JOIN Cliente_Lecturas cl ON l.ID_Lecturas = cl.ID_Lectura WHERE l.Nombre_Lectura = ? AND cl.ID_Usuario = ?", 
+                               (nombre_lectura, id_usuario))
+                row = cursor.fetchone()  # Obtenemos solo una fila
+                if row:
+                    ubicacion = str(row[0])  # Si se encontró una fila, obtenemos la ubicación
+            except sqlite3.Error as e:
+                print("Error al ejecutar la consulta:", e)
+            finally:
+                self.connexion.close()
+        else:
+            print("No se pudo obtener la conexión a la base de datos.")
+        return ubicacion

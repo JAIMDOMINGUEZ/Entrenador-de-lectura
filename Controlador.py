@@ -1,6 +1,7 @@
 from Modelo import Usuario, Lectura 
 from kivy.app import App
 import os
+from Documento import Documento
 class ControladorCuentas:
     def __init__(self):
         pass
@@ -37,13 +38,8 @@ class ControladorLecturas:
     def eliminar_lectura(self,nombre_lectura,id_usuario):
         return self.modelo.eliminar_lectura(nombre_lectura,id_usuario)
     def es_valido(self,file_path):
-        # Obtener la extensión del archivo
-        file_extension = os.path.splitext(file_path)[1].lower()
-        # Comprobar si la extensión es .pdf
-        if file_extension == '.pdf':
-            return True
-        else:
-            return False
+        self.doc=Documento(file_path)
+        return self.doc.validar_documento()
     def salvar_archivo(self,id_usuario,nombre_lectura,tipo_lectura,selected_pdf):
         # Obtener la ubicación del archivo actual
             current_path = os.path.dirname(os.path.realpath(__file__))
@@ -62,7 +58,13 @@ class ControladorLecturas:
             relative_pdf_path = os.path.relpath(new_pdf_path, current_path)
             return self.modelo.guardar_lectura(id_usuario,nombre_lectura,tipo_lectura,relative_pdf_path)
 
-    
-   
-    
-    
+    def mostar_lectura_tipo(self,id_usuario,tipo):
+        return self.modelo.consultar_por_tipo(id_usuario,tipo)
+    def mostar_lectura_nombre(self,id_usuario,nombre):
+        return self.modelo.consultar_ubicacion(id_usuario,nombre)
+    def archivo_existe(self,archivo):
+        self.doc=Documento(archivo)
+        return self.doc.validar_documento()
+    def dividir_documento(self,archivo):
+        self.doc=Documento(archivo)
+        return self.doc.separar_pdf()

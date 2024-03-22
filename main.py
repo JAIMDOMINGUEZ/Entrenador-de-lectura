@@ -8,7 +8,7 @@ from kivy.app import App
 from kivy.graphics import Color, Rectangle
 from kivy.core.window import Window
 from Controlador import ControladorCuentas
-from Vista import VentanaCrearCuenta
+from Vista import VentanaIniciarSesion
 class RootLayout(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -25,8 +25,8 @@ class CreaCuentaApp(App):
     def build(self):
         root = RootLayout(orientation='vertical')
         self.controlador = ControladorCuentas()
-        ventana_crea_cuenta = VentanaCrearCuenta(self.controlador)
-        root.add_widget(ventana_crea_cuenta)
+        ventana_iniciar_session = VentanaIniciarSesion(self.controlador)
+        root.add_widget(ventana_iniciar_session)
         return root
 if __name__ == "__main__":
     CreaCuentaApp().run()

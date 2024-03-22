@@ -4,6 +4,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.app import App
+from kivy.core.text import LabelBase
 from kivy.graphics import Color, Rectangle
 from kivy.core.window import Window
 from Controlador import ControladorCuentas ,ControladorLecturas
@@ -31,19 +32,19 @@ class VentanaCrearCuenta(BoxLayout):
         self.controlador = ControladorCuentas
         self.add_widget(Label(text="Crear Cuenta", font_size=40,color=[0, 0, 0, 1]))
         self.add_widget(Label(text="Nombre de Usuario:",color=[0, 0, 0, 1],font_size=20))
-        self.username_input = TextInput(multiline=False)
+        self.username_input = TextInput(multiline=False,halign="center",font_size=25)
         self.add_widget(self.username_input)
         
-        self.add_widget(Label(text="Ingrese Contraseña",color=[0, 0, 0, 1],font_size=20))
-        self.password_input = TextInput(multiline=False, password=True)
+        self.add_widget(Label(text="Ingrese Contraseña:",color=[0, 0, 0, 1],font_size=20))
+        self.password_input = TextInput(multiline=False, password=True,halign="center",font_size=25)
         self.add_widget(self.password_input)
 
         self.show_password_button = Button(text="Mostrar Contraseña")
         self.show_password_button.bind(on_press=self.toggle_password_visibility)
         self.add_widget(self.show_password_button)
         
-        self.add_widget(Label(text="Confirmar Contraseña",color=[0, 0, 0, 1],font_size=20))
-        self.confirm_password_input = TextInput(multiline=False, password=True)
+        self.add_widget(Label(text="Confirmar Contraseña:",color=[0, 0, 0, 1],font_size=20))
+        self.confirm_password_input = TextInput(multiline=False, password=True,halign="center",font_size=25)
         self.add_widget(self.confirm_password_input)
         
         self.show_confirm_password_button = Button(text="Mostrar Contraseña")
@@ -93,6 +94,7 @@ class VentanaCrearCuenta(BoxLayout):
         
         if self.controlador.crear_cuenta(nombre_usuario,contraseña):
             self.mostrar_mensaje_cuenta_creada()
+            self.ir_a_inicio_sesion()
         else:
             self.mostrar_mensaje_usuario_existente()
     
@@ -157,12 +159,13 @@ class VentanaIniciarSesion(BoxLayout):
         
         self.add_widget(Label(text="Iniciar Sesión", font_size=40, color=[0, 0, 0, 1]))
         
-        self.add_widget(Label(text="Nombre de Usuario", color=[0, 0, 0, 1], font_size=20))
-        self.username_input = TextInput(multiline=False)
+        self.add_widget(Label(text="Nombre de Usuario:", color=[0, 0, 0, 1], font_size=35))
+        self.username_input = TextInput(multiline=False,halign="center",font_size=25)
+
         self.add_widget(self.username_input)
         
-        self.add_widget(Label(text="Contraseña", color=[0, 0, 0, 1], font_size=20))
-        self.password_input = TextInput(multiline=False, password=True)
+        self.add_widget(Label(text="Contraseña:", color=[0, 0, 0, 1], font_size=35))
+        self.password_input = TextInput(multiline=False, password=True,halign="center",font_size=25)
         self.add_widget(self.password_input)
 
         self.show_password_button = Button(text="Mostrar Contraseña")
@@ -337,6 +340,7 @@ class Administrador(RelativeLayout):
         self.selected_lectura_id = None  # Variable para almacenar el ID de la lectura seleccionada
         self.controlador=ControladorLecturas()
         self.id_usuario=id_usuario
+        self.scroll_view=ScrollView(size_hint=(1, 0.5), pos_hint={'x': 0, 'y': 0.3})
         self.gui()
         self.mostrar_lecturas()
     
@@ -345,23 +349,24 @@ class Administrador(RelativeLayout):
         
         lecturas=self.controlador.mostrar_lecturas_disponibles(self.id_usuario)
         # Crear un ScrollView para contener los botones de lectura
-        scroll_view = ScrollView(size_hint=(1, 0.5), pos_hint={'x': 0, 'y': 0.3})
+        self.scroll_view = ScrollView(size_hint=(1, 0.5), pos_hint={'x': 0, 'y': 0.3})
         layout = GridLayout(cols=1, spacing=5, size_hint_y=None)
         layout.bind(minimum_height=layout.setter('height'))
-        scroll_view.clear_widgets()
+        
         # Crear botones para mostrar las lecturas disponibles
         for lectura in lecturas:
             ID_Lecturas, nombre_lectura, tipo_lectura = lectura[:3]  # Desempaqueta los primeros tres valores
             texto_boton = f"{nombre_lectura} ------ {tipo_lectura}"
-            boton = Button(text=texto_boton, size_hint_y=None, height=40)
+            boton = Button(text=texto_boton, size_hint_y=None, height=60)
 
             # Modificar el evento on_press para almacenar el ID de la lectura seleccionada
             boton.bind(on_press=lambda instancia, ID_Lecturas=ID_Lecturas: self.select_lectura(ID_Lecturas))
             layout.add_widget(boton)
 
 
-        scroll_view.add_widget(layout)
-        self.add_widget(scroll_view)
+        self.scroll_view.add_widget(layout)
+        
+        self.add_widget(self.scroll_view)
 
     def select_lectura(self, lectura_id):
         # Almacenar el ID de la lectura seleccionada
@@ -431,25 +436,26 @@ class Administrador(RelativeLayout):
 
 
     def gui(self):
-        self.agregar = Button(text="Agregar Lectura", pos_hint={'x': 0.0884956, 'y': 0.13}, size_hint=(0.383481, 0.05))
-        self.agregar.bind(on_press=self.ir_a_agregar_lectura)
-        self.add_widget(self.agregar)
-
-        self.eliminar = Button(text="Eliminar Lectura", pos_hint={'x': 0.530973, 'y': 0.13}, size_hint=(0.383481, 0.05))
-        self.eliminar.bind(on_press=lambda instance: self.eliminar_lectura())
-        self.add_widget(self.eliminar)
+        self.home_button = Button(text="HOME", pos_hint={'x': 0.0294985, 'y': 0.93}, size_hint=(0.2, 0.03))
+        self.home_button.bind(on_press=self.ir_a_home)
+        self.add_widget(self.home_button)
 
         self.label = Label(text="Administrador de Lecturas", halign='center', pos_hint={'x': 0.100000, 'y': 0.8},
                            size_hint=(0.843658, 0.303333), font_size=26, color=[0, 0, 0, 1])
         self.add_widget(self.label)
 
         self.label2 = Label(text="Lecturas Disponibles", halign='center', pos_hint={'x': 0.100000, 'y': 0.7},
-                           size_hint=(0.843658, 0.303333), font_size=24, color=[0, 0, 0, 1])
+                            size_hint=(0.843658, 0.303333), font_size=24, color=[0, 0, 0, 1])
         self.add_widget(self.label2)
 
-        self.home_button = Button(text="HOME", pos_hint={'x': 0.0294985, 'y': 0.9}, size_hint=(0.2, 0.03))
-        self.home_button.bind(on_press=self.ir_a_home)
-        self.add_widget(self.home_button)
+        self.agregar = Button(text="Agregar Lectura", size_hint=(0.5, 0.1), pos_hint={'x': 0, 'y': 0})
+        self.agregar.bind(on_press=self.ir_a_agregar_lectura)
+        self.add_widget(self.agregar)
+
+        self.eliminar = Button(text="Eliminar Lectura", size_hint=(0.5, 0.1), pos_hint={'x': 0.5, 'y': 0})
+        self.eliminar.bind(on_press=lambda instance: self.eliminar_lectura())
+        self.add_widget(self.eliminar)
+        
 
     
 
@@ -525,7 +531,11 @@ class Agregar_Lectura(RelativeLayout):
         self.popup.open()
 
     def file_selected(self, instance, selection, touch):
-        self.selected_pdf = selection[0]
+        try:
+            self.selected_pdf = selection[0]
+            print("Archivo seleccionado:", self.selected_pdf)
+        except IndexError:
+            print("Error: No se ha seleccionado ningún archivo.")
         self.popup.dismiss()
 
     def confirm_upload(self, instance):
@@ -551,7 +561,7 @@ class Agregar_Lectura(RelativeLayout):
     def is_valid_pdf(self,file_path):
         return self.controlador.es_valido(file_path)
     def cancel_upload(self, instance):
-        self.popup.dismiss()
+        self.ir_a_Administrador()
 
     def upload_lecture(self, instance):
         if self.selected_pdf:
@@ -579,9 +589,8 @@ class Agregar_Lectura(RelativeLayout):
    
     def ir_a_Administrador(self, instance):
         # Cerrar el popup de éxito si está abierto
-        if self.success_popup:
+        if hasattr(self, 'success_popup') and self.success_popup:
             self.success_popup.dismiss()
-
         # Crear una instancia de la clase Administrador
         ventana_Admin = Administrador(self.id_usuario)
         ventana_Admin.size = Window.size
@@ -654,9 +663,10 @@ class Seleccionar_Lectura(RelativeLayout):
         if (self.controlador.archivo_existe(archivo)):#verificar_existencia_pdf(archivo)
            self.ir_a_preferencias(archivo)
         else:
-            
-            popup_content = Label(text="El archivo no existe.")
+            print("archivo no encontrado")
+            popup_content = Label(text="No se encontro el documento de la lectura.")
             popup = Popup(title="Error", content=popup_content, size_hint=(None, None), size=(400, 200))
+            popup.open()  # Mostrar el Popup
            
     def on_Select_Tipo(self, widget, value):
         self.mostar_lecturas(value)
@@ -817,7 +827,7 @@ class Preferencias(RelativeLayout):
         btn_layout.add_widget(Button(text='Si', on_release=self.omitir_guardar))
         btn_layout.add_widget(Button(text='No', on_release=self.cerrar_ventana))
         content.add_widget(btn_layout)
-        self.popup = Popup(title='Confirmar Omitir', content=content, size_hint=(None, None), size=(300, 200))
+        self.popup = Popup(title='Confirmar Omitir', content=content, size_hint=(None, None), size=(500, 200))
         self.popup.open()
 
     def omitir_guardar(self,instance):
@@ -848,12 +858,12 @@ class Preferencias(RelativeLayout):
         self.popup.dismiss()
     def confirmar_guardar(self):
         content = BoxLayout(orientation='vertical')
-        content.add_widget(Label(text='¿Estás seguro de que deseas guardar las preferencias?',font_size=12))
+        content.add_widget(Label(text='¿Estás seguro de que deseas guardar las preferencias?'))
         btn_layout = BoxLayout(size_hint_y=None, height=40)
         btn_layout.add_widget(Button(text='Continuar', on_release=self.omitir_guardar))
         btn_layout.add_widget(Button(text='No', on_release=self.cerrar_ventana))
         content.add_widget(btn_layout)
-        self.popup = Popup(title='Confirmar Guardar', content=content, size_hint=(None, None), size=(300, 200))
+        self.popup = Popup(title='Confirmar Guardar', content=content, size_hint=(None, None), size=(500, 200))
         self.popup.open()
     def go_to_home(self, instance):
         ventana_Home = Home(self.id_usuario)
@@ -924,9 +934,12 @@ class Iniciar_lectura(RelativeLayout):
             self.text_input.text = contenido[self.indice_actual]
             self.indice_actual = (self.indice_actual + 1)
         else:
+            print(self.indice_actual)
+            self.detener_temporizador()
             self.mostrar_popup_felicidades()
 
     def mostrar_popup_felicidades(self):
+        print("pop abierto")
         self.popup = Popup(title='¡Felicidades!',
                       size_hint=(None, None), size=(300, 200))
         boton_cerrar = Button(text='Cerrar', size_hint_y=None, height=40)
@@ -940,6 +953,8 @@ class Iniciar_lectura(RelativeLayout):
     def go_to_home(self, instance):
         if self.popup:  # Verifica si el popup existe antes de cerrarlo
             self.popup.dismiss()
+            
+
         ventana_Home = Home(self.id_usuario)
         ventana_Home.size = Window.size
         # Cambiar a la nueva instancia de la aplicación
@@ -963,9 +978,10 @@ class Iniciar_lectura(RelativeLayout):
             self.clock_event.cancel()
         self.clock_event = Clock.schedule_interval(self.decrementar_barra, intervalo)
 
-    def detener_temporizador(self, dt):
+    def detener_temporizador(self):
         if self.clock_event is not None:
             self.clock_event.cancel()
+            self.clock_event = None  # Asignar None al evento del temporizador
 
     def asignarprefencias(self,tamanio,color,tipografia,velocidad):
         self.velocidad = velocidad

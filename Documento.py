@@ -61,3 +61,29 @@ class Documento:
         except Exception as e:
             print("Ocurrió un error:", e)
             return None
+    def salvar_archivo(self,id_usuario,nombre_lectura,tipo_lectura,selected_pdf):
+        # Obtener la ubicación del archivo actual
+            current_path = os.path.dirname(os.path.realpath(__file__))
+            # Crear la ruta a la subcarpeta "lecturas" relativa a la ubicación actual del archivo
+            ubicacion="lecturas/"+str(id_usuario)
+            lecturas_path = os.path.join(current_path, ubicacion)
+            # Si la subcarpeta no existe, créala
+            if not os.path.exists(lecturas_path):
+                os.makedirs(lecturas_path)
+            # Crear una copia del archivo PDF en la subcarpeta "lecturas"
+            new_pdf_path = os.path.join(lecturas_path, os.path.basename(selected_pdf))
+            with open(selected_pdf, 'rb') as f_in:
+                with open(new_pdf_path, 'wb') as f_out:
+                    f_out.write(f_in.read())
+
+            # Guardar la ubicación de la copia del archivo PDF de manera relativa
+            relative_pdf_path = os.path.relpath(new_pdf_path, current_path)
+            return relative_pdf_path
+    def eliminar_archivo(self,ubicacion):
+        try:
+            os.remove(ubicacion)
+            print(f"El archivo {ubicacion} ha sido eliminado.")
+            return True
+        except OSError as e:
+            print(f"No se pudo eliminar el archivo {ubicacion}: {e}")
+            return False

@@ -102,6 +102,7 @@ class Lectura:
             try:
                 self.cursor = self.connexion.cursor()
                 self.cursor.execute("DELETE FROM Cliente_Lecturas WHERE ID_Lectura IN ( SELECT ID_Lecturas FROM Lecturas WHERE Nombre_Lectura = ?)AND ID_Usuario = ?", (nombre_lectura,id_usuario))
+                self.cursor.execute("DELETE FROM Lecturas WHERE Nombre_Lectura = ?", (nombre_lectura,))
                 self.connexion.commit()  # Es importante hacer commit después de ejecutar la eliminación
                 print("La lectura se ha eliminado correctamente.")
                 return True
@@ -115,6 +116,7 @@ class Lectura:
 
     def consultar_lecturas(self, id_usuario):
         lecturas = []
+        
         self.connexion=establecer_conexion()
         if self.connexion:
             try:
@@ -123,7 +125,7 @@ class Lectura:
                 for row in rows:
                     lecturas.append(row)   
             except sqlite3.Error as e:
-                print("Error al ejecutar la consulta:", e)
+                print("Error al ejecutar la consulta lecturas:", e)
             finally:
                 self.connexion.close()
         else:
@@ -165,7 +167,7 @@ class Lectura:
                 if row:
                     ubicacion = str(row[0])  # Si se encontró una fila, obtenemos la ubicación
             except sqlite3.Error as e:
-                print("Error al ejecutar la consulta:", e)
+                print("Error al ejecutar la consulta de ubucacion:", e)
             finally:
                 self.connexion.close()
         else:
